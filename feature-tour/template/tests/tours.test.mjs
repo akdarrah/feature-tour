@@ -10,14 +10,19 @@ import { execFileSync } from 'node:child_process';
 for (const name of readdirSync('tours')) {
   const { FACTS, STAMP } = await import(`../tours/${name}/facts.js`);
   const { ROLES } = await import(`../tours/${name}/roles.js`);
+  // Sources may live beside the facts (internal tours) or in sources.js, which the
+  // bundle never imports (tours that go to customers).
+  const sourcesFile = `tours/${name}/sources.js`;
+  const sourcesMod = existsSync(sourcesFile) ? await import(`../${sourcesFile}`) : {};
+  const SOURCES = sourcesMod.SOURCES || {};
 
   test(`${name}: every fact has a value, a path:line source and is verified`, () => {
     for (const [id, entry] of Object.entries(FACTS)) {
       assert.notEqual(entry.value, undefined, `${id} has no value`);
-      assert.match(entry.source, /\S+:\d+/, `${id} source must be path:line`);
+      assert.match(entry.source ?? SOURCES[id] ?? '', /\S+:\d+/, `${id} source must be path:line`);
       assert.equal(entry.verified, true, `${id} was not checked against the code`);
     }
-    assert.ok(STAMP.date && STAMP.commit, 'STAMP needs a date and a commit');
+    assert.ok(STAMP.date && (STAMP.commit || sourcesMod.COMMIT), 'STAMP needs a date and a commit');
   });
 
   for (const role of ROLES) {
@@ -46,5 +51,7 @@ for (const name of readdirSync('tours')) {
     assert.doesNotMatch(html, /<script[^>]+src=/, 'no external scripts');
     assert.doesNotMatch(html, /<link[^>]+href=/, 'no external stylesheets');
     assert.doesNotMatch(html, /https?:\/\/(?!www\.w3\.org\/)/, 'no network urls');
+    for (const source of Object.values(SOURCES)) assert.ok(!html.includes(source.split(':')[0]), `bundle leaks ${source}`);
+    if (sourcesMod.COMMIT) assert.ok(!html.includes(sourcesMod.COMMIT), 'bundle leaks the commit');
   });
 }

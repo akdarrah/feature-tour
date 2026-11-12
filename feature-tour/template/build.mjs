@@ -10,7 +10,8 @@ async function buildTour(dir) {
   const js = await build({ entryPoints: [`${dir}/main.js`], bundle: true, format: 'iife', write: false });
 
   let css = await readFile('engine/engine.css', 'utf8');
-  if (existsSync(`${dir}/tour.css`)) css += await readFile(`${dir}/tour.css`, 'utf8');
+  // fonts.css holds any embedded @font-face (data: URIs only; the tour loads nothing).
+  for (const file of ['fonts.css', 'tour.css']) if (existsSync(`${dir}/${file}`)) css += await readFile(`${dir}/${file}`, 'utf8');
 
   const meta = JSON.parse(await readFile(`${dir}/tour.json`, 'utf8'));
 
@@ -18,7 +19,7 @@ async function buildTour(dir) {
   const script = js.outputFiles[0].text.replaceAll('</script', '<\\/script');
 
   const html = `<!doctype html>
-<html lang="en">
+<html lang="en"${meta.theme ? ` data-theme="${meta.theme}"` : ''}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
