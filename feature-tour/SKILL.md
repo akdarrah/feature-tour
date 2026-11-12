@@ -46,13 +46,21 @@ One invented story runs through every role, so a learner who does two roles sees
 
 ### 6. Build
 
-Copy `template/` into a new project folder (not inside the product repo). Add `tours/<name>/` with `tour.json`, `facts.js`, `scenario.js`, `screens/`, `roles.js`, `main.js` and `tour.css`. Keep product words out of `engine/` (the test enforces it). Compute every number on screen from state and the facts; never type a rule into a screen or a script.
+Copy `template/` into a new project folder (not inside the product repo). Add `tours/<name>/` with `tour.json`, `facts.js`, `scenario.js`, `screens/`, `roles.js`, `main.js` and `tour.css` (plus `fonts.css` and `sources.js` when needed, below). Keep product words out of `engine/` (the test enforces it). Compute every number on screen from state and the facts; never type a rule into a screen or a script.
+
+**Make it look like the product, and finished.** The tour is often the first thing a customer or new teammate sees of the product, so it should read as a polished page, not a dev tool. Dress the tour around the mock as well as the mock itself:
+
+- In `tour.css`, set the `--tour-*` tokens on `:root` from the product's design system: `--tour-accent` (its primary colour), `--tour-font`, `--tour-bg` and `--tour-stage` (its page colours), `--tour-ink`, `--tour-muted`, `--tour-line`, `--tour-radius`. The menu, coach panel, predict cards, quiz and results all read them. `engine/engine.css` lists every token.
+- If the product is light only, put `"theme": "light"` in `tour.json` so the tour doesn't turn dark on a dark-mode machine while the mock stays light.
+- Use the product's real typeface. The file loads nothing from the network, so embed it: put an `@font-face` with a `data:` URI in `tours/<name>/fonts.css` (the build includes it). Only embed a font whose licence allows it (for example SIL OFL fonts from Google Fonts), and only the Latin subset, to keep the file small.
+- Open on `showMenu()` from `engine/menu.js`, with the product's wordmark as `brand`, a one-line `intro`, and the role cards it builds (each lists its steps). Don't hand-build a menu.
+- For an outside audience (customers, prospects), keep `path:line` sources out of the file: put them in `tours/<name>/sources.js` (exporting `SOURCES` and `COMMIT`), which the bundle never imports. The tests still require every fact to have one, and fail if a path or the commit leaks into the build.
 
 Run `npm test` and `npm run build`. The output is `dist/<name>.html`.
 
 ### 7. Walk it, then stop
 
-Open the built file and do every step as a learner would. Check that each highlighted target makes sense, typed values complete their tasks, fills look believable, numbers agree across screens, and answers match the facts. Write down what you fixed in `research/walkthrough.md`.
+Open the built file and do every step as a learner would. Check that each highlighted target makes sense, typed values complete their tasks, fills look believable, numbers agree across screens, and answers match the facts. Take screenshots of the menu, a step mid-predict, and the results, and check them against the product's look: the brand colour, the font, nothing unreadable or cramped, nothing that looks unstyled. Write down what you fixed in `research/walkthrough.md`.
 
 **Build one role, then stop and ask whether it helps** before building the rest. The first role proves the idea; the rest repeat the pattern.
 
@@ -70,3 +78,5 @@ Give the person the file path. It is one file with no network calls, so it can b
 - Rows marked `data-row="<key>"` animate in when a fill adds them.
 - Predict and quiz options are shown in a shuffled but stable order.
 - Mock inputs should carry `autocomplete="off"` and `data-1p-ignore` so password managers leave them alone.
+- A step's `fill` can carry a `note` that replaces the default "You did the first one by hand. Now let the tour do the rest." Use it when the fill isn't "the rest" (for example "click the link in the confirmation email").
+- A fact without a `source` (because it lives in `sources.js`) simply shows no source line under the rule.

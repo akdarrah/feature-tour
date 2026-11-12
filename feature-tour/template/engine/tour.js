@@ -71,7 +71,7 @@ async function copyText(text) {
  * @param {'browser'|'phone'|'tablet'} options.frame
  * @param {object[]} options.steps       see the Step typedef in the plan
  * @param {object[]} options.quiz
- * @param {Record<string, {text: string, source: string}>} options.facts
+ * @param {Record<string, {text: string, source?: string}>} options.facts  source is shown under the rule when present
  * @param {() => object} options.makeState
  * @param {Record<string, {render: Function, address?: Function}>} options.screens
  * @param {Record<string, Function>} [options.controls]  tour controls, clickable any time via data-tour-free
@@ -258,7 +258,7 @@ export function runTour(options) {
           { class: 'tour-rule' },
           h('div', { class: 'tour-rule-label' }, 'The rule'),
           h('p', null, facts[id].text),
-          h('small', null, facts[id].source),
+          facts[id].source && h('small', null, facts[id].source),
         ),
       );
   }
@@ -287,7 +287,7 @@ export function runTour(options) {
         h(
           'div',
           { class: 'tour-why' },
-          h('strong', null, answered.right ? 'Right. ' : 'Not quite. '),
+          h('strong', { class: answered.right ? 'is-right' : 'is-wrong' }, answered.right ? 'Right. ' : 'Not quite. '),
           question.why,
         ),
       answered && ruleCards(question.facts || []),
@@ -306,7 +306,7 @@ export function runTour(options) {
         'div',
         { class: 'tour-progress' },
         h('span', null, `Step ${stepIndex + 1} of ${total}`),
-        h('div', { class: 'tour-bar' }, h('i', { style: { width: `${(stepIndex / total) * 100}%` } })),
+        h('div', { class: 'tour-segments' }, steps.map((_, i) => h('i', { class: i < stepIndex ? 'is-done' : i === stepIndex ? 'is-current' : '' }))),
       ),
       h('h2', { class: 'tour-step-title' }, step.title),
       h('p', { class: 'tour-coach-text' }, step.coach),
@@ -351,7 +351,7 @@ export function runTour(options) {
       );
     } else if (phase === 'fill') {
       coach.append(
-        h('p', { class: 'tour-fill-note' }, 'You did the first one by hand. Now let the tour do the rest.'),
+        h('p', { class: 'tour-fill-note' }, step.fill.note || 'You did the first one by hand. Now let the tour do the rest.'),
         h(
           'button',
           {
@@ -460,7 +460,7 @@ export function runTour(options) {
         'div',
         { class: 'tour-center tour-results' },
         h('div', { class: 'tour-role' }, options.title),
-        h('h2', null, 'Done'),
+        h('h2', null, `You finished the ${options.title} tour`),
         h(
           'div',
           { class: 'tour-scores' },

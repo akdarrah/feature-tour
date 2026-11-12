@@ -1,40 +1,22 @@
-/* The made-up Lantern Library look. In a real tour, copy the product's design tokens here. */
+/* The made-up Lantern Library look. In a real tour, copy the product's design tokens here:
+   the --tour-* tokens dress the menu, coach panel and quiz in the product's brand, and the
+   app classes below mock its screens. */
 
-.tour-menu {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 40px 16px;
-  width: 100%;
+:root {
+  --tour-font: Georgia, 'Times New Roman', serif;
+  --tour-bg: #fbf7f1;
+  --tour-stage: #f1e9dd;
+  --tour-ink: #2b2118;
+  --tour-muted: #7a6a58;
+  --tour-line: #e8dccb;
+  --tour-accent: #b4541a;
+  --tour-accent-soft: #f8ebe0;
+  --tour-radius: 6px;
 }
 
-.tour-menu h1 {
-  font-size: 28px;
-  margin: 0 0 8px;
-}
-
-.tour-menu p {
-  color: var(--tour-muted);
-  margin: 0 0 20px;
-}
-
-.tour-menu-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  background: var(--tour-panel);
-  border: 1px solid var(--tour-line);
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-}
-
-.tour-menu-card span,
-.tour-menu-card small {
-  color: var(--tour-muted);
+.ll-brand {
+  font-weight: 700;
+  font-size: 18px;
 }
 
 .ll-app {
